@@ -36,7 +36,7 @@ authentication and a clean layered architecture.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/SpringCRM.git
+   git clone https://github.com/devtilek/SpringCRM.git
 
 2. Navigate to the project directory:
    cd SpringCRM
