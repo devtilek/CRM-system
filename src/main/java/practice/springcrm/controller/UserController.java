@@ -4,10 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import practice.springcrm.dto.JwtResponse;
 import practice.springcrm.dto.SignInRequest;
 import practice.springcrm.dto.SignUpRequest;
 import practice.springcrm.dto.UserDTO;
@@ -27,8 +26,15 @@ public class UserController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<UserDTO> loginUser(@Valid @RequestBody SignInRequest signInRequest){
-        UserDTO userDTO =userService.loginUser(signInRequest);
-        return ResponseEntity.ok(userDTO);
+    public ResponseEntity<JwtResponse> loginUser(@Valid @RequestBody SignInRequest signInRequest){
+        JwtResponse jwtResponse = userService.loginUser(signInRequest);
+        return ResponseEntity.ok(jwtResponse);
     }
+
+    @GetMapping("/admin-test")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String testAdin(){
+        return "Hello, Admin!";
+    }
+
 }
