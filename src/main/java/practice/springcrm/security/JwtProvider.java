@@ -4,7 +4,6 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import practice.springcrm.entity.User;
@@ -26,10 +25,20 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject(user.getUsername())
+                .claim("role", user.getRole().name())
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(jwtAccessSecret)
                 .compact();
+    }
+
+    public String getRoleFromToken(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(jwtAccessSecret)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
     }
 
     public boolean validateToken(String token){
