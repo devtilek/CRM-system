@@ -9,7 +9,7 @@ import practice.springcrm.entity.User;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-14T20:04:18+0500",
+    date = "2026-07-16T18:33:50+0500",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Microsoft)"
 )
 @Component
@@ -45,6 +45,8 @@ public class UserMapperImpl implements UserMapper {
         user.setUsername( signUpRequest.getUsername() );
         user.setEmail( signUpRequest.getEmail() );
         user.setPassword( signUpRequest.getPassword() );
+
+        user.setRole( practice.springcrm.entity.Role.valueOf(signUpRequest.getRole().toUpperCase()) );
 
         return user;
     }
