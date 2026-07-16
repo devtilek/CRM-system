@@ -27,4 +27,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Course> courses;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }
