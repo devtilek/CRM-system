@@ -12,6 +12,6 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "courses",ignore = true)
-    @Mapping(target = "role", expression = "java(practice.springcrm.entity.Role.valueOf(signUpRequest.getRole().toUpperCase()))")
+    @Mapping(target = "role", ignore = true)
     User toEntity(SignUpRequest signUpRequest);
 }
