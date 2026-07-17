@@ -2,7 +2,6 @@ package practice.springcrm.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -23,6 +22,4 @@ public class SignUpRequest {
     @NotBlank(message = "Подверждение пароля обязательно")
     private String confirmPassword;
 
-    @NotNull(message = "Роль должна быть выбрана")
-    private String role;
 }
