@@ -1,5 +1,6 @@
 package practice.springcrm.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class UserImpl implements UserService {
         User user = userMapper.toEntity(signUpRequest);
 
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-        user.setRole(Role.STUDENT);
+        user.setRole(Role.ROLE_STUDENT);
         User savedUser = userRepo.save(user);
 
         return userMapper.toDTO(savedUser);
@@ -60,5 +61,14 @@ public class UserImpl implements UserService {
         String token = jwtProvider.generateToken(user);
 
         return new JwtResponse(token, user.getUsername());
+    }
+
+    @Override
+    @Transactional
+    public void changeUserRole(String email, Role role){
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+        user.setRole(role);
+        userRepo.save(user);
     }
 }
