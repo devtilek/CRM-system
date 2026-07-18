@@ -10,31 +10,39 @@ import practice.springcrm.dto.JwtResponse;
 import practice.springcrm.dto.SignInRequest;
 import practice.springcrm.dto.SignUpRequest;
 import practice.springcrm.dto.UserDTO;
+import practice.springcrm.entity.Role;
 import practice.springcrm.service.UserService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/signup")
+    @PostMapping("/auth/signup")
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody SignUpRequest signUpRequest){
         UserDTO registeredUser = userService.registerUser(signUpRequest);
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/auth/signin")
     public ResponseEntity<JwtResponse> loginUser(@Valid @RequestBody SignInRequest signInRequest){
         JwtResponse jwtResponse = userService.loginUser(signInRequest);
         return ResponseEntity.ok(jwtResponse);
     }
 
     @GetMapping("/admin-test")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String testAdin(){
         return "Hello, Admin!";
+    }
+
+    @PostMapping("/admin/change-role")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<String> changeRole(@RequestParam String email, @RequestParam Role role){
+        userService.changeUserRole(email, role);
+        return ResponseEntity.ok("Роль пользователя " + email + " успешно изменена на " + role);
     }
 
 }
