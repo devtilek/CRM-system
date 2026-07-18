@@ -1,8 +1,8 @@
 package practice.springcrm.entity;
 
 public enum Role {
-    ADMIN,
-    MANAGER,
-    TEACHER,
-    STUDENT,
+    ROLE_ADMIN,
+    ROLE_MANAGER,
+    ROLE_TEACHER,
+    ROLE_STUDENT,
 }
