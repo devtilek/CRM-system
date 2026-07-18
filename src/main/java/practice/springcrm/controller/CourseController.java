@@ -3,8 +3,10 @@ package practice.springcrm.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import practice.springcrm.dto.CourseDTO;
+import practice.springcrm.dto.UserDTO;
 import practice.springcrm.service.CourseService;
 
 import java.util.List;
@@ -25,7 +27,7 @@ public class CourseController {
     public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long id){
         return ResponseEntity.ok(courseService.getCourse(id));
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/addCourse")
     public ResponseEntity<String> addCourse(@RequestBody CourseDTO courseDTO,@RequestParam Long userId){
         courseService.addCourse(courseDTO,userId);
@@ -37,4 +39,11 @@ public class CourseController {
         courseService.deleteCourse(id);
         return ResponseEntity.ok("Курс успешно удален");
     }
+
+    @GetMapping("/{courseId}/students")
+    @PreAuthorize("hasRole('ROLE_MANEGER') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<UserDTO>> getStudentsByCourse(@PathVariable Long courseId){
+        return ResponseEntity.ok(courseService.getStudentsByCourse(courseId));
+    }
+
 }
