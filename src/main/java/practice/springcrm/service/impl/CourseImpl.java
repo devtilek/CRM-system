@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import practice.springcrm.dto.CourseCreateDTO;
 import practice.springcrm.dto.CourseDTO;
 import practice.springcrm.dto.UserDTO;
 import practice.springcrm.entity.Course;
@@ -39,13 +40,14 @@ public class CourseImpl implements CourseService {
 
     @Override
     @Transactional
-    public void addCourse(CourseDTO courseDTO, Long teacherId) {
+    public void addCourse(CourseCreateDTO courseCreateDTO, Long teacherId) {
         User teacher = userRepo.findById(teacherId).orElseThrow(() ->
                 new EntityNotFoundException("Teacher not found with id: " + teacherId));
         if (teacher.getRole() != Role.ROLE_TEACHER){
             throw new IllegalArgumentException("The user with this ID is not a teacher");
         }
-        Course course = courseMapper.toEntity(courseDTO);
+        Course course = courseMapper.toEntity(courseCreateDTO);
+        course.setTeacher(teacher);
         courseRepo.save(course);
     }
 
