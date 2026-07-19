@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import practice.springcrm.dto.CourseCreateDTO;
 import practice.springcrm.dto.CourseDTO;
 import practice.springcrm.dto.UserDTO;
 import practice.springcrm.service.CourseService;
@@ -29,11 +30,12 @@ public class CourseController {
     }
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/addCourse")
-    public ResponseEntity<String> addCourse(@RequestBody CourseDTO courseDTO,@RequestParam Long userId){
-        courseService.addCourse(courseDTO,userId);
+    public ResponseEntity<String> addCourse(@RequestBody CourseCreateDTO courseCreateDTO,
+                                            @RequestParam Long teacherId){
+        courseService.addCourse(courseCreateDTO,teacherId);
         return new ResponseEntity<>("Курс успешно добавлен пользователю", HttpStatus.CREATED);
     }
-
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCourse(@PathVariable Long id){
         courseService.deleteCourse(id);
@@ -41,7 +43,7 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/students")
-    @PreAuthorize("hasRole('ROLE_MANEGER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<UserDTO>> getStudentsByCourse(@PathVariable Long courseId){
         return ResponseEntity.ok(courseService.getStudentsByCourse(courseId));
     }
