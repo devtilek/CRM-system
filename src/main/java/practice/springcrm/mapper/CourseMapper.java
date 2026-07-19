@@ -1,6 +1,7 @@
 package practice.springcrm.mapper;
 
 import org.mapstruct.Mapper;
+import practice.springcrm.dto.CourseCreateDTO;
 import practice.springcrm.dto.CourseDTO;
 import practice.springcrm.entity.Course;
 
@@ -13,4 +14,6 @@ public interface CourseMapper {
     Course toEntity(CourseDTO courseDTO);
 
     List<CourseDTO> courseListDTO(List<Course> courseList);
+
+    Course toEntity(CourseCreateDTO courseCreateDTO);
 }
