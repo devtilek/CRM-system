@@ -13,7 +13,7 @@ import practice.springcrm.service.CourseService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/courses")
+@RequestMapping("/api/courses")
 @RequiredArgsConstructor
 public class CourseController {
 
@@ -35,7 +35,7 @@ public class CourseController {
         courseService.addCourse(courseCreateDTO,teacherId);
         return new ResponseEntity<>("Курс успешно добавлен пользователю", HttpStatus.CREATED);
     }
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCourse(@PathVariable Long id){
         courseService.deleteCourse(id);
