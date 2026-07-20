@@ -34,7 +34,7 @@ public class UserController {
 
     @GetMapping("/admin-test")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String testAdin(){
+    public String testAdmin(){
         return "Hello, Admin!";
     }
 
