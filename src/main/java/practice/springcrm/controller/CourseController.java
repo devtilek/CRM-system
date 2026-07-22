@@ -20,8 +20,14 @@ public class CourseController {
     private final CourseService courseService;
 
     @GetMapping
-    public ResponseEntity<List<CourseDTO>> getAllCourses(){
-        return ResponseEntity.ok(courseService.getAllCourses());
+    public ResponseEntity<?> getAllCourses(){
+        try {
+            return ResponseEntity.ok(courseService.getAllCourses());
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
