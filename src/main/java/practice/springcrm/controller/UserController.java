@@ -21,28 +21,29 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody SignUpRequest signUpRequest){
+    public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         UserDTO registeredUser = userService.registerUser(signUpRequest);
-        return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
     }
 
     @PostMapping("/auth/signin")
-    public ResponseEntity<JwtResponse> loginUser(@Valid @RequestBody SignInRequest signInRequest){
-        JwtResponse jwtResponse = userService.loginUser(signInRequest);
-        return ResponseEntity.ok(jwtResponse);
+    public ResponseEntity<JwtResponse> loginUser(@Valid @RequestBody SignInRequest signInRequest) {
+        return ResponseEntity.ok(userService.loginUser(signInRequest));
     }
 
     @GetMapping("/admin-test")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String testAdmin(){
-        return "Hello, Admin!";
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<String> testAdmin() {
+        return ResponseEntity.ok("Hello, Admin!");
     }
 
-    @PostMapping("/admin/change-role")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> changeRole(@RequestParam String email, @RequestParam Role role){
+    @PutMapping("/roles")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> changeRole(
+            @RequestParam String email,
+            @RequestParam Role role
+    ) {
         userService.changeUserRole(email, role);
-        return ResponseEntity.ok("Роль пользователя " + email + " успешно изменена на " + role);
+        return ResponseEntity.noContent().build();
     }
-
 }
