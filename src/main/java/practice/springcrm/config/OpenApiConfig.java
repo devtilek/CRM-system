@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI customOpenAPI(){
+    public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Spring CRM API")
-                        .version("1.0")
-                        .description("Привет! Это документация Api для проекта Spring CRM,удачи:)"));
+                        .title("SpringCRM API")
+                        .version("1.0.0")
+                        .description("REST API for user, role, course and enrollment management."));
     }
 }
