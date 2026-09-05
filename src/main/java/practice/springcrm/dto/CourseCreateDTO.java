@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class CourseCreateDTO {
 
-    @NotBlank(message = "Названеи курса не должно быть пустым ")
-    @Size(min = 3,max = 50, message = "Название курса должен быть от 3 до 50 символов")
+    @NotBlank(message = "Course name must not be blank")
+    @Size(min = 3, max = 100, message = "Course name must be between 3 and 100 characters")
     private String courseName;
 }
