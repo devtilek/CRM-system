@@ -1,21 +1,24 @@
 # SpringCRM
 
-A backend CRM application built with **Java 17** and **Spring Boot 3.3**. The project demonstrates REST API development, JWT authentication, role-based authorization, persistence with PostgreSQL, DTO mapping, database migrations, API documentation, and Docker-based local infrastructure.
+A backend CRM application built with **Java 17** and **Spring Boot 3.3**. The project demonstrates REST API development, JWT authentication, role-based authorization, PostgreSQL persistence, DTO mapping, Liquibase migrations, OpenAPI documentation, Docker-based local infrastructure, and automated context testing.
 
 ## Features
 
 - User registration and authentication
-- JWT-based authentication
+- BCrypt password hashing
+- JWT-based stateless authentication
 - Role-based authorization with Spring Security
-- User and course management
-- Course-to-student relationships
+- User role management
+- Course CRUD operations
+- Teacher and student relationships
+- Student enrollment in courses
 - Request validation with Jakarta Bean Validation
 - DTO-based API layer with MapStruct
 - PostgreSQL persistence with Spring Data JPA / Hibernate
 - Liquibase database migrations
 - OpenAPI / Swagger documentation
-- Docker Compose configuration for PostgreSQL
-- Basic Spring Boot integration test setup
+- Docker Compose PostgreSQL environment
+- Isolated H2 application-context test profile
 
 ## Tech Stack
 
@@ -24,7 +27,7 @@ A backend CRM application built with **Java 17** and **Spring Boot 3.3**. The pr
 | Language | Java 17 |
 | Framework | Spring Boot 3.3 |
 | Web | Spring Web, REST API |
-| Security | Spring Security, JWT (JJWT) |
+| Security | Spring Security, JWT (JJWT), BCrypt |
 | Persistence | Spring Data JPA, Hibernate |
 | Database | PostgreSQL |
 | Migrations | Liquibase |
@@ -33,24 +36,38 @@ A backend CRM application built with **Java 17** and **Spring Boot 3.3**. The pr
 | Documentation | OpenAPI / Swagger |
 | Build | Maven |
 | Containerization | Docker, Docker Compose |
-| Testing | JUnit 5, Spring Boot Test |
+| Testing | JUnit 5, Spring Boot Test, H2 |
 | Utilities | Lombok |
 
 ## Architecture
 
-The application follows a layered backend structure:
+The application uses a layered architecture:
 
 ```text
+HTTP Request
+     |
+     v
 Controller
-    ↓
+     |
+     v
 Service
-    ↓
+     |
+     v
 Repository
-    ↓
+     |
+     v
 PostgreSQL
 ```
 
-DTOs and MapStruct are used between the API and service layers, while Spring Security handles authentication and authorization.
+Cross-cutting concerns are handled by dedicated components:
+
+```text
+JWT Authentication -> Spring Security Filter Chain
+DTO Mapping        -> MapStruct
+Validation         -> Jakarta Bean Validation
+Exceptions         -> GlobalExceptionHandler
+Schema Changes     -> Liquibase
+```
 
 ## API Overview
 
@@ -61,11 +78,11 @@ POST /api/users/auth/signup
 POST /api/users/auth/signin
 ```
 
-### Users / Administration
+### Administration
 
 ```text
-GET  /api/users/admin-test
-POST /api/users/admin/change-role
+GET /api/users/admin-test
+PUT /api/users/roles?email={email}&role={role}
 ```
 
 ### Courses
@@ -73,25 +90,28 @@ POST /api/users/admin/change-role
 ```text
 GET    /api/courses
 GET    /api/courses/{id}
-POST   /api/courses/addCourse
+POST   /api/courses?teacherId={teacherId}
 DELETE /api/courses/{id}
+POST   /api/courses/{courseId}/students/{studentId}
 GET    /api/courses/{courseId}/students
+GET    /api/courses/teacher/{teacherId}
 ```
 
-Some endpoints require specific roles such as `ROLE_ADMIN` or `ROLE_MANAGER`.
+Protected operations require the appropriate role (`ROLE_ADMIN`, `ROLE_MANAGER`, or `ROLE_TEACHER`).
 
 ## Project Structure
 
 ```text
 src/main/java/practice/springcrm/
-├── config/        # OpenAPI and security configuration
+├── config/        # Security and OpenAPI configuration
 ├── controller/    # REST controllers
 ├── dto/           # Request and response DTOs
 ├── entity/        # JPA entities and roles
+├── exception/     # Global REST exception handling
 ├── mapper/        # MapStruct mappers
 ├── repository/    # Spring Data repositories
-├── service/       # Business logic
-└── security/      # JWT-related security components
+├── security/      # JWT provider and authentication filter
+└── service/       # Business logic
 ```
 
 ## Getting Started
@@ -117,14 +137,16 @@ docker compose up -d db
 
 ### 3. Configure environment variables
 
-Create environment variables for the application database and JWT secret. You can use the provided `application-example.properties` as a starting point.
+Copy `.env.example` as a reference, then configure the following environment variables in your shell or IDE:
 
 ```text
 DB_URL=jdbc:postgresql://localhost:5432/SpringCRM
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
-JWT_SECRET=change-me-to-a-long-random-secret
+JWT_SECRET_ACCESS=base64-encoded-secret-with-at-least-256-bits
 ```
+
+The JWT secret must decode to at least 256 bits because the application uses an HMAC signing key.
 
 ### 4. Run the application
 
@@ -140,13 +162,11 @@ mvnw.cmd spring-boot:run
 
 ### 5. Open API documentation
 
-After the application starts, open:
-
 ```text
 http://localhost:8080/swagger-ui/index.html
 ```
 
-OpenAPI JSON is available at:
+OpenAPI JSON:
 
 ```text
 http://localhost:8080/v3/api-docs
@@ -154,7 +174,7 @@ http://localhost:8080/v3/api-docs
 
 ## Testing
 
-Run the test suite with:
+The test suite uses an isolated in-memory H2 database, so tests do not require a running PostgreSQL instance.
 
 ```bash
 ./mvnw test
@@ -162,11 +182,20 @@ Run the test suite with:
 
 ## Docker
 
-The repository contains a Dockerfile for running the packaged Spring Boot application and Docker Compose configuration for the PostgreSQL database.
+The Dockerfile packages the application into a lightweight Eclipse Temurin Java 17 runtime image. Docker Compose is provided for the local PostgreSQL database.
+
+## Environment & Security
+
+- Secrets are provided through environment variables.
+- Local `.env` files are ignored by Git.
+- Passwords are stored using BCrypt hashes.
+- JWT authentication is stateless.
+- Database schema changes are managed by Liquibase.
+- IDE metadata is excluded from version control.
 
 ## Project Status
 
-This project is an educational backend application and is intended to demonstrate Spring Boot backend development patterns and technologies.
+Educational portfolio backend project focused on demonstrating clean Spring Boot backend development patterns.
 
 ## Author
 
