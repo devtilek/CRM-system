@@ -27,6 +27,7 @@
     </changeSet>
 
     <changeSet id="2" author="tilek">
+        <validCheckSum>ANY</validCheckSum>
         <createTable tableName="course">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -80,6 +81,16 @@
             <tableExists tableName="user"/>
         </preConditions>
         <renameTable oldTableName="user" newTableName="app_user"/>
+    </changeSet>
+
+    <changeSet id="4" author="tilek">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="course_student"/>
+        </preConditions>
+        <addUniqueConstraint
+                tableName="course_student"
+                columnNames="course_id, student_id"
+                constraintName="uk_course_student_v2"/>
     </changeSet>
 
 </databaseChangeLog>
