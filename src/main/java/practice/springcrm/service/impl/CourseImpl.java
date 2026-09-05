@@ -15,45 +15,50 @@ import practice.springcrm.mapper.UserMapper;
 import practice.springcrm.repository.CourseRepo;
 import practice.springcrm.repository.UserRepo;
 import practice.springcrm.service.CourseService;
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CourseImpl implements CourseService {
+
     private final CourseMapper courseMapper;
     private final UserMapper userMapper;
     private final CourseRepo courseRepo;
     private final UserRepo userRepo;
 
-
     @Override
     public CourseDTO getCourse(Long id) {
-        Course course = courseRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Course not found with id: " + id));
+        Course course = courseRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with id: " + id));
         return courseMapper.toDTO(course);
     }
 
     @Override
     public List<CourseDTO> getAllCourses() {
-        List<Course> courseList = courseRepo.findAll();
-        return courseMapper.courseListDTO(courseList);
+        return courseMapper.courseListDTO(courseRepo.findAll());
     }
 
     @Override
     @Transactional
     public void addCourse(CourseCreateDTO courseCreateDTO, Long teacherId) {
-        User teacher = userRepo.findById(teacherId).orElseThrow(() ->
-                new EntityNotFoundException("Teacher not found with id: " + teacherId));
-        if (teacher.getRole() != Role.ROLE_TEACHER){
-            throw new IllegalArgumentException("The user with this ID is not a teacher");
+        User teacher = userRepo.findById(teacherId)
+                .orElseThrow(() -> new EntityNotFoundException("Teacher not found with id: " + teacherId));
+
+        if (teacher.getRole() != Role.ROLE_TEACHER) {
+            throw new IllegalArgumentException("The selected user is not a teacher");
         }
+
         Course course = courseMapper.toEntity(courseCreateDTO);
         course.setTeacher(teacher);
         courseRepo.save(course);
     }
 
     @Override
+    @Transactional
     public void deleteCourse(Long id) {
-        if (!courseRepo.existsById(id)){
+        if (!courseRepo.existsById(id)) {
             throw new EntityNotFoundException("Course not found with id: " + id);
         }
         courseRepo.deleteById(id);
@@ -62,24 +67,35 @@ public class CourseImpl implements CourseService {
     @Override
     @Transactional
     public void enrollStudent(Long courseId, Long studentId) {
-        Course course = courseRepo.findById(courseId).orElseThrow(() -> new EntityNotFoundException("Course not found"));
-        User student = userRepo.findById(studentId).orElseThrow(() -> new EntityNotFoundException("Student not found"));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with id: " + courseId));
+
+        User student = userRepo.findById(studentId)
+                .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + studentId));
+
+        if (student.getRole() != Role.ROLE_STUDENT) {
+            throw new IllegalArgumentException("The selected user is not a student");
+        }
+
+        if (course.getStudents().stream().anyMatch(user -> user.getId().equals(studentId))) {
+            throw new IllegalArgumentException("Student is already enrolled in this course");
+        }
+
         course.getStudents().add(student);
-        courseRepo.save(course);
     }
 
     @Override
     public List<CourseDTO> getCoursesByTeacher(Long teacherId) {
         return courseRepo.findByTeacherId(teacherId).stream()
-                .map(courseMapper ::toDTO)
+                .map(courseMapper::toDTO)
                 .toList();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDTO> getStudentsByCourse(Long courseId) {
-        Course course = courseRepo.findById(courseId).orElseThrow(() ->
-                new EntityNotFoundException("Course not found"));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with id: " + courseId));
+
         return course.getStudents().stream()
                 .map(userMapper::toDTO)
                 .toList();
