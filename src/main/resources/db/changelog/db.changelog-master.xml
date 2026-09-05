@@ -86,11 +86,14 @@
     <changeSet id="4" author="tilek">
         <preConditions onFail="MARK_RAN" onError="HALT">
             <tableExists tableName="course_student"/>
+            <not>
+                <uniqueConstraintExists constraintName="uk_course_student" tableName="course_student"/>
+            </not>
         </preConditions>
         <addUniqueConstraint
                 tableName="course_student"
                 columnNames="course_id, student_id"
-                constraintName="uk_course_student_v2"/>
+                constraintName="uk_course_student"/>
     </changeSet>
 
 </databaseChangeLog>
