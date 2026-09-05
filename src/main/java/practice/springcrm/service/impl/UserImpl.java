@@ -16,6 +16,7 @@ import practice.springcrm.repository.UserRepo;
 import practice.springcrm.security.JwtProvider;
 import practice.springcrm.service.UserService;
 
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -27,48 +28,52 @@ public class UserImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public UserDTO registerUser(SignUpRequest signUpRequest) {
-        if (!signUpRequest.getPassword().equals(signUpRequest.getConfirmPassword())){
-            throw new IllegalArgumentException("Пароли не совпадает");
+        String email = signUpRequest.getEmail().trim().toLowerCase(Locale.ROOT);
+        String username = signUpRequest.getUsername().trim();
+
+        if (!signUpRequest.getPassword().equals(signUpRequest.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
         }
 
-        if (userRepo.existsByEmail(signUpRequest.getEmail())){
-            throw new IllegalArgumentException("Пользователь с таким Email уже сущиствует ");
+        if (userRepo.existsByEmail(email)) {
+            throw new IllegalArgumentException("A user with this email already exists");
         }
 
-        if (userRepo.existsByUsername(signUpRequest.getUsername())){
-            throw new IllegalArgumentException("Пользователь с таким Username уже сущиствует");
+        if (userRepo.existsByUsername(username)) {
+            throw new IllegalArgumentException("A user with this username already exists");
         }
 
         User user = userMapper.toEntity(signUpRequest);
-
+        user.setEmail(email);
+        user.setUsername(username);
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setRole(Role.ROLE_STUDENT);
-        User savedUser = userRepo.save(user);
 
-        return userMapper.toDTO(savedUser);
+        return userMapper.toDTO(userRepo.save(user));
     }
 
     @Override
     @Transactional(readOnly = true)
     public JwtResponse loginUser(SignInRequest signInRequest) {
-        User user = userRepo.findByEmail(signInRequest.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Неверный Email или password"));
+        String email = signInRequest.getEmail().trim().toLowerCase(Locale.ROOT);
 
-        if (!passwordEncoder.matches(signInRequest.getPassword(), user.getPassword())){
-            throw new IllegalArgumentException("Неверный Email или password");
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(signInRequest.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Invalid email or password");
         }
-        String token = jwtProvider.generateToken(user);
 
-        return new JwtResponse(token, user.getUsername());
+        return new JwtResponse(jwtProvider.generateToken(user), user.getUsername());
     }
 
     @Override
     @Transactional
-    public void changeUserRole(String email, Role role){
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+    public void changeUserRole(String email, Role role) {
+        User user = userRepo.findByEmail(email.trim().toLowerCase(Locale.ROOT))
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setRole(role);
-        userRepo.save(user);
     }
 }
