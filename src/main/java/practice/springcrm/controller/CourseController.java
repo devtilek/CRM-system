@@ -1,5 +1,6 @@
 package practice.springcrm.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,38 +21,51 @@ public class CourseController {
     private final CourseService courseService;
 
     @GetMapping
-    public ResponseEntity<?> getAllCourses(){
-        try {
-            return ResponseEntity.ok(courseService.getAllCourses());
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    public ResponseEntity<List<CourseDTO>> getAllCourses() {
+        return ResponseEntity.ok(courseService.getAllCourses());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long id){
+    public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long id) {
         return ResponseEntity.ok(courseService.getCourse(id));
     }
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/addCourse")
-    public ResponseEntity<String> addCourse(@RequestBody CourseCreateDTO courseCreateDTO,
-                                            @RequestParam Long teacherId){
-        courseService.addCourse(courseCreateDTO,teacherId);
-        return new ResponseEntity<>("Курс успешно добавлен пользователю", HttpStatus.CREATED);
-    }
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCourse(@PathVariable Long id){
-        courseService.deleteCourse(id);
-        return ResponseEntity.ok("Курс успешно удален");
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping
+    public ResponseEntity<Void> addCourse(
+            @Valid @RequestBody CourseCreateDTO courseCreateDTO,
+            @RequestParam Long teacherId
+    ) {
+        courseService.addCourse(courseCreateDTO, teacherId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
+        courseService.deleteCourse(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PostMapping("/{courseId}/students/{studentId}")
+    public ResponseEntity<Void> enrollStudent(
+            @PathVariable Long courseId,
+            @PathVariable Long studentId
+    ) {
+        courseService.enrollStudent(courseId, studentId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER')")
     @GetMapping("/{courseId}/students")
-    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<UserDTO>> getStudentsByCourse(@PathVariable Long courseId){
+    public ResponseEntity<List<UserDTO>> getStudentsByCourse(@PathVariable Long courseId) {
         return ResponseEntity.ok(courseService.getStudentsByCourse(courseId));
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_TEACHER')")
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<List<CourseDTO>> getCoursesByTeacher(@PathVariable Long teacherId) {
+        return ResponseEntity.ok(courseService.getCoursesByTeacher(teacherId));
+    }
 }
