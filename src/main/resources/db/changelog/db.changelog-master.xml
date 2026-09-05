@@ -4,12 +4,14 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
     <changeSet id="1" author="tilek">
-        <createTable tableName="user">
+        <validCheckSum>ANY</validCheckSum>
+        <createTable tableName="app_user">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="username" type="varchar(255)">
+            <column name="username" type="varchar(50)">
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="email" type="varchar(255)">
@@ -18,19 +20,22 @@
             <column name="password" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="role" type="varchar(50)"/>
+            <column name="role" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
-    
+
     <changeSet id="2" author="tilek">
         <createTable tableName="course">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="course_name" type="varchar(255)">
+            <column name="course_name" type="varchar(100)">
                 <constraints nullable="false"/>
             </column>
             <column name="teacher_id" type="bigint">
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
@@ -43,14 +48,38 @@
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseTableName="course" baseColumnNames="teacher_id" constraintName="fk_course_teacher"
-                                 referencedTableName="user"
-                                 referencedColumnNames="id"/>
-        <addForeignKeyConstraint baseTableName="course_student" baseColumnNames="course_id" constraintName="fk_cs_course"
-                                 referencedTableName="course"
-                                 referencedColumnNames="id"/>
-        <addForeignKeyConstraint baseTableName="course_student" baseColumnNames="student_id" constraintName="fk_cs_student"
-                                 referencedTableName="user"
-                                 referencedColumnNames="id"/>
+        <addUniqueConstraint
+                tableName="course_student"
+                columnNames="course_id, student_id"
+                constraintName="uk_course_student"/>
+
+        <addForeignKeyConstraint
+                baseTableName="course"
+                baseColumnNames="teacher_id"
+                constraintName="fk_course_teacher"
+                referencedTableName="app_user"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="course_student"
+                baseColumnNames="course_id"
+                constraintName="fk_cs_course"
+                referencedTableName="course"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="course_student"
+                baseColumnNames="student_id"
+                constraintName="fk_cs_student"
+                referencedTableName="app_user"
+                referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="3" author="tilek">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="user"/>
+        </preConditions>
+        <renameTable oldTableName="user" newTableName="app_user"/>
+    </changeSet>
+
 </databaseChangeLog>
