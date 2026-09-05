@@ -1,37 +1,41 @@
- gitignore
-  # Maven
-  target/
-  .mvn/wrapper/maven-wrapper.jar
+# Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
 
-  # IntelliJ IDEA
-  .idea/
-  *.iml
-  *.iws
-  *.ipr
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
 
-  # OS specific
-  .DS_Store
-  Thumbs.db
-  ehthumbs.db
+# Environment files
+.env
+.env.*
+!.env.example
 
-  # Logs and databases
-  *.log
-  *.sqlite
-  *.sqlite3
-  *.db
+# OS specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
 
-  # STS (Spring Tool Suite)
-  .apt_generated
-  .classpath
-  .factorypath
-  .project
-  .settings
-  .springBeans
-  .sts4-cache
+# Logs and local databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
 
-  # VS Code
-  .vscode/
+# STS / Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
 
-  # Build folders for other IDEs (optional)
-  build/
-  bin/
+# VS Code
+.vscode/
+
+# Build folders
+build/
+bin/
