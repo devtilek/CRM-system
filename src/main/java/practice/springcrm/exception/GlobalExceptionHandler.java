@@ -1,51 +1,69 @@
 package practice.springcrm.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import practice.springcrm.dto.ErrorResponse;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex){
-        Map<String, String> feildErrors = new HashMap<>();
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            feildErrors.put(error.getField(), error.getDefaultMessage());
+            fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage());
         }
 
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", "Ошибка валидации");
-        body.put("errors", feildErrors);
-        body.put("timestamp", LocalDateTime.now());
-
-        return  new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return build(
+                HttpStatus.BAD_REQUEST,
+                "Validation failed",
+                "One or more request fields are invalid",
+                fieldErrors
+        );
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException ex){
-        practice.springcrm.dto.ErrorResponse errorResponse = new practice.springcrm.dto.ErrorResponse(ex.getMessage(), null, LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException ex) {
+        return build(HttpStatus.NOT_FOUND, "Resource not found", ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException ex) {
+        return build(HttpStatus.BAD_REQUEST, "Bad request", ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(DataIntegrityViolationException ex) {
+        return build(HttpStatus.CONFLICT, "Data conflict", "The requested operation violates a database constraint", null);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex){
-        ex.printStackTrace();
-        ErrorResponse error = new ErrorResponse(
-                "Ошибка на сервере",
-                ex.getMessage(),
-                LocalDateTime.now()
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
+        return build(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Internal server error",
+                "An unexpected error occurred",
+                null
         );
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<ErrorResponse> build(
+            HttpStatus status,
+            String message,
+            String details,
+            Map<String, String> errors
+    ) {
+        return ResponseEntity.status(status)
+                .body(new ErrorResponse(message, details, LocalDateTime.now(), errors));
     }
 }
