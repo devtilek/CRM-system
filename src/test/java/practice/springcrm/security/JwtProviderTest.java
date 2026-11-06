@@ -72,4 +72,12 @@ class JwtProviderTest {
         String token = new JwtProvider(otherKey, 60_000).generateToken(user());
         assertFalse(provider.validateToken(token));
     }
+
+    @Test
+    void rejectsAlteredPayload() {
+        String token = provider.generateToken(user());
+        String[] parts = token.split("\\.");
+        parts[1] = (parts[1].startsWith("A") ? "B" : "A") + parts[1].substring(1);
+        assertFalse(provider.validateToken(String.join(".", parts)));
+    }
 }
