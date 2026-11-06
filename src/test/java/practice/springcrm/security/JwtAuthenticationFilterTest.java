@@ -52,4 +52,11 @@ class JwtAuthenticationFilterTest {
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verifyNoInteractions(provider, userRepo);
     }
+
+    @Test
+    void skipsBasicAuthorization() throws Exception {
+        execute("Basic ZGVtbzpwYXNz");
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verifyNoInteractions(provider, userRepo);
+    }
 }
