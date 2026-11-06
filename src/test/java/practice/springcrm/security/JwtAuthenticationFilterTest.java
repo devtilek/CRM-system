@@ -89,4 +89,12 @@ class JwtAuthenticationFilterTest {
         execute("Bearer valid");
         assertNull(SecurityContextHolder.getContext().getAuthentication());
     }
+
+    @Test
+    void rejectsStaleRoleInSignedJwt() throws Exception {
+        validClaims();
+        when(userRepo.findByUsername("alice")).thenReturn(Optional.of(persistedUser(Role.ROLE_TEACHER)));
+        execute("Bearer valid");
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
 }
