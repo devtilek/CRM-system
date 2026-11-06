@@ -64,4 +64,12 @@ class JwtProviderTest {
                 .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(KEY))).compact();
         assertFalse(provider.validateToken(token));
     }
+
+    @Test
+    void rejectsDifferentSigningKey() {
+        String otherKey = Base64.getEncoder().encodeToString(
+                "abcdef0123456789abcdef0123456789".getBytes(StandardCharsets.UTF_8));
+        String token = new JwtProvider(otherKey, 60_000).generateToken(user());
+        assertFalse(provider.validateToken(token));
+    }
 }
