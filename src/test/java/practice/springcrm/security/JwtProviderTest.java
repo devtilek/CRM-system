@@ -45,4 +45,9 @@ class JwtProviderTest {
     void rejectsEmptyToken() {
         assertFalse(provider.validateToken(""));
     }
+
+    @Test
+    void rejectsMalformedToken() {
+        assertFalse(provider.validateToken("not.a.jwt"));
+    }
 }
