@@ -50,4 +50,10 @@ class JwtProviderTest {
     void rejectsMalformedToken() {
         assertFalse(provider.validateToken("not.a.jwt"));
     }
+
+    @Test
+    void rejectsExpiredToken() {
+        JwtProvider expired = new JwtProvider(KEY, -60_000);
+        assertFalse(expired.validateToken(expired.generateToken(user())));
+    }
 }
