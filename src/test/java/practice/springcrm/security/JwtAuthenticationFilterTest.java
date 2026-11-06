@@ -97,4 +97,14 @@ class JwtAuthenticationFilterTest {
         execute("Bearer valid");
         assertNull(SecurityContextHolder.getContext().getAuthentication());
     }
+
+    @Test
+    void acceptsCurrentPersistedRole() throws Exception {
+        validClaims();
+        when(userRepo.findByUsername("alice")).thenReturn(Optional.of(persistedUser(Role.ROLE_STUDENT)));
+        execute("Bearer valid");
+        assertEquals("alice", SecurityContextHolder.getContext().getAuthentication().getName());
+        assertTrue(SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .contains(new SimpleGrantedAuthority("ROLE_STUDENT")));
+    }
 }
