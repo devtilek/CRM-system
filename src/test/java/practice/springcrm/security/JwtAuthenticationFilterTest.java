@@ -107,4 +107,14 @@ class JwtAuthenticationFilterTest {
         assertTrue(SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .contains(new SimpleGrantedAuthority("ROLE_STUDENT")));
     }
+
+    @Test
+    void preservesPreviouslyEstablishedAuthentication() throws Exception {
+        var existing = new UsernamePasswordAuthenticationToken("existing", null,
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        SecurityContextHolder.getContext().setAuthentication(existing);
+        execute("Bearer valid");
+        assertSame(existing, SecurityContextHolder.getContext().getAuthentication());
+        verifyNoInteractions(provider, userRepo);
+    }
 }
