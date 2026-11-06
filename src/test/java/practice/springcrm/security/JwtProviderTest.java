@@ -30,4 +30,9 @@ class JwtProviderTest {
     void acceptsFreshSignedToken() {
         assertTrue(provider.validateToken(provider.generateToken(user())));
     }
+
+    @Test
+    void extractsUsername() {
+        assertEquals("alice", provider.getUsernameFromToken(provider.generateToken(user())));
+    }
 }
