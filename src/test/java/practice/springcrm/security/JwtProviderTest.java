@@ -35,4 +35,9 @@ class JwtProviderTest {
     void extractsUsername() {
         assertEquals("alice", provider.getUsernameFromToken(provider.generateToken(user())));
     }
+
+    @Test
+    void extractsRole() {
+        assertEquals("ROLE_STUDENT", provider.getRoleFromToken(provider.generateToken(user())));
+    }
 }
