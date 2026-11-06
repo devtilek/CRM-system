@@ -59,4 +59,11 @@ class JwtAuthenticationFilterTest {
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verifyNoInteractions(provider, userRepo);
     }
+
+    @Test
+    void skipsLowercaseBearerScheme() throws Exception {
+        execute("bearer valid");
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verifyNoInteractions(provider, userRepo);
+    }
 }
