@@ -66,4 +66,11 @@ class JwtAuthenticationFilterTest {
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verifyNoInteractions(provider, userRepo);
     }
+
+    @Test
+    void skipsEmptyBearerToken() throws Exception {
+        execute("Bearer ");
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verifyNoInteractions(provider, userRepo);
+    }
 }
