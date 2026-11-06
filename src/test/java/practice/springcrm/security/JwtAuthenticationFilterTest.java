@@ -81,4 +81,12 @@ class JwtAuthenticationFilterTest {
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verifyNoInteractions(userRepo);
     }
+
+    @Test
+    void rejectsDeletedUserWithValidJwt() throws Exception {
+        validClaims();
+        when(userRepo.findByUsername("alice")).thenReturn(Optional.empty());
+        execute("Bearer valid");
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
 }
