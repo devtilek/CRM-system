@@ -73,4 +73,12 @@ class JwtAuthenticationFilterTest {
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verifyNoInteractions(provider, userRepo);
     }
+
+    @Test
+    void rejectsInvalidJwtWithoutDatabaseLookup() throws Exception {
+        when(provider.validateToken("invalid")).thenReturn(false);
+        execute("Bearer invalid");
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verifyNoInteractions(userRepo);
+    }
 }
