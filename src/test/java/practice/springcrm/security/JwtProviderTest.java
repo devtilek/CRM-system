@@ -40,4 +40,9 @@ class JwtProviderTest {
     void extractsRole() {
         assertEquals("ROLE_STUDENT", provider.getRoleFromToken(provider.generateToken(user())));
     }
+
+    @Test
+    void rejectsEmptyToken() {
+        assertFalse(provider.validateToken(""));
+    }
 }
