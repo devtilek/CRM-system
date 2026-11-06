@@ -56,4 +56,12 @@ class JwtProviderTest {
         JwtProvider expired = new JwtProvider(KEY, -60_000);
         assertFalse(expired.validateToken(expired.generateToken(user())));
     }
+
+    @Test
+    void rejectsDifferentIssuer() {
+        String token = Jwts.builder().setSubject("alice").setIssuer("untrusted")
+                .setExpiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(KEY))).compact();
+        assertFalse(provider.validateToken(token));
+    }
 }
